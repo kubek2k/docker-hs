@@ -1,4 +1,8 @@
 import           Docker.Client
+import           Data.Conduit.Binary as CB
+import           Data.ByteString as BS
+import           System.IO (stdout)
+import           System.Directory (getCurrentDirectory)
 
 runNginxContainer :: IO ContainerID
 runNginxContainer = do
@@ -62,3 +66,11 @@ runPostgresWithDataContainer = do
            _ <- startContainer defaultStartOpts i
            return i
 
+loadExampleImage :: IO ()
+loadExampleImage = do
+  h <- defaultHttpHandler
+  currDir <- getCurrentDirectory
+  let sink = CB.sinkHandle System.IO.stdout
+  let image = currDir ++ "/tests/exampleimage.tar"
+  _ <- runDockerT (defaultClientOpts, h) $ loadImage False image sink
+  return ()
